@@ -796,23 +796,17 @@ class Red:
         n = self.nk
         N = self.nbands
         pace = self.pace
-        lattice = self.lattice
-        tol = 1
         k2 = self.k
         tipo=[('re', float),('im', float)];
-        frec = np.zeros((len(k2), N, 2));
-        pruebaj = np.zeros(N)
-        count_esp = n;
-        cut0 = cut
         its_sol = 0;
         count = 0;
         gamma = False;
-        first = False;
         n_prueba = 15;
+        self.omega = np.array(np.zeros([N, n]), dtype = tipo)
         print('Initializing...')
 
 
-        for i in k2:
+        for count,i in enumerate(k2):
 
             if i == np.pi:
                 gamma = True
@@ -821,7 +815,6 @@ class Red:
 
             mat = np.array(np.zeros(N), dtype=tipo)
             if i == 0:
-                first = True
                 prueba_min = prueba0
                 while True:
                     sol = fsolve(self.Det,[prueba_min,0], args=(i,cut), maxfev=50, full_output=True)
@@ -835,14 +828,14 @@ class Red:
                 lista_pruebas = np.linspace(prueba_min, prueba_max, n_prueba)
             else:
                 if gamma:
-                    prueba_min = frec[count-1,1,0]*0.8
-                    prueba_max = np.max(frec[count-1,:,0])*1.2
-                if np.min(frec[count-1,-1,0]) == 0:
+                    prueba_min = self.omega[1,count-1]['re']*0.8
+                    prueba_max = np.max(self.omega[:,count-1]['re'])*1.2
+                if np.min(self.omega[-1,count-1]['re']) == 0:
                     prueba_min = prueba0
-                    prueba_max = np.min(frec[count-2,:,0])*1.2
+                    prueba_max = np.min(self.omega[:,count-2]['re'])*1.2
                 else:
                     prueba_min = prueba0
-                    prueba_max = np.min(frec[count-1,:,0])*1.2
+                    prueba_max = np.min(self.omega[:,count-1]['re'])*1.2
                 lista_pruebas = np.linspace(prueba_min, prueba_max, n_prueba)
 
             j = 0;
@@ -855,17 +848,7 @@ class Red:
                     prueba_max = prueba_min + pace*n_prueba
 
             mat = np.sort(mat, order='re')
-            path = self.frecfolder
-            name = path + '/frecuencias' + str(np.around(i,2)) + '.txt'
-            np.savetxt(name, mat);
-            for p in range(N):
-
-                frec[count, p, :] = [mat[p]['re'], mat[p]['im']]
-
-            count = count + 1;
-
-            print(np.floor(i/(self.k[-1])*100), " %")
-        self.omega = frec
+            self.omega[:, count] = mat
 
     def create_folder(self, foldername):
 
