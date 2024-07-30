@@ -849,6 +849,7 @@ class Red:
 
             mat = np.sort(mat, order='re')
             self.omega[:, count] = mat
+            print('k['+str(count)+']')
 
     def create_folder(self, foldername):
 
